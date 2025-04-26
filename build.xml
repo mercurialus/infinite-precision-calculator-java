@@ -21,15 +21,13 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar destfile="${jar.dir}/aarithmetic.jar" basedir="${build.dir}">
-            <manifest>
-                <attribute name="Main-Class" value="${main.class}"/>
-            </manifest>
+        <jar destfile="${jar.dir}/aarithmetic.jar">
+            <fileset dir="${build.dir}/arbitraryarithmetic"/> 
         </jar>
     </target>
 
-    <target name="run" depends="compile">
-        <java classname="${main.class}" fork="true" classpath="${build.dir}">
+    <target name="run" depends="compile,jar">
+        <java classname="${main.class}" fork="true" classpath="${build.dir}:${jar.dir}/aarithmetic.jar">
             <arg line="${args}"/>
         </java>
     </target>
