@@ -17,6 +17,7 @@ public class Main {
             System.out.println("Multiplication: " + i1.multiply(i2));
             System.out.println("Addition: " + i1.add(i2));
             System.out.println("Subtraction: " + i1.subtract(i2));
+            System.out.println("Divsion: " + i1.divide(i2));
         }
     }
 }

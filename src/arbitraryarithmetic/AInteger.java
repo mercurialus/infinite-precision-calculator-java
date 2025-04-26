@@ -206,52 +206,60 @@ public class AInteger {
     }
 
     // Integer division for general (either neg or pos) numbers
+    // division: integer quotient only, no remainder, no floats
     public AInteger divide(AInteger other) {
+        // don't allow division by zero
         if (other.value.size() == 1 && other.value.get(0) == 0) {
-            throw new ArithmeticException("Division by zero error");
+            throw new ArithmeticException("Division by zero");
         }
 
+        // work with absolute values, fix sign at the end
         AInteger dividend = new AInteger(this);
         dividend.isNegative = false;
         AInteger divisor = new AInteger(other);
         divisor.isNegative = false;
 
+        // if dividend < divisor, quotient is 0
         if (compareAbsolute(dividend, divisor) < 0) {
-            return new AInteger(0); // If dividend smaller than divisor, quotient is 0
+            return new AInteger(0);
         }
 
-        AInteger result = new AInteger();
-        result.value.clear();
-
+        List<Integer> quotMsf = new ArrayList<>(); // hold quotient digits MS-first
         AInteger current = new AInteger();
-        current.value.clear();
+        current.value.clear(); // start with zero
 
-        // Manual long division
+        // long division: bring down chunks from highest to lowest
         for (int i = dividend.value.size() - 1; i >= 0; i--) {
+            // shift current left by one chunk, then add next chunk
             current.value.add(0, dividend.value.get(i));
             current.stripZeros();
 
-            int x = 0, l = 0, r = 10000;
-            // Binary search to find the maximum multiplier
-            while (l <= r) {
-                int m = (l + r) / 2;
-                AInteger mid = divisor.multiply(new AInteger(m));
-                if (compareAbsolute(mid, current) <= 0) {
-                    x = m;
-                    l = m + 1;
+            // find the largest x in 0..9999 so that divisor * x <= current
+            int low = 0, high = 9999, best = 0;
+            while (low <= high) {
+                int mid = (low + high) >>> 1;
+                AInteger prod = divisor.multiply(new AInteger(mid));
+                if (compareAbsolute(prod, current) <= 0) {
+                    best = mid;
+                    low = mid + 1;
                 } else {
-                    r = m - 1;
+                    high = mid - 1;
                 }
             }
+            quotMsf.add(best);
 
-            result.value.add(0, x);
-            current = current.subtract(divisor.multiply(new AInteger(x)));
+            // subtract divisor * best from current
+            current = current.subtract(divisor.multiply(new AInteger(best)));
         }
 
-        Collections.reverse(result.value);
+        // convert MS-first to our storage (LS-first)
+        Collections.reverse(quotMsf);
+        AInteger result = new AInteger();
+        result.value = quotMsf;
         result.stripZeros();
-        result.isNegative = this.isNegative != other.isNegative;
 
+        // sign of quotient is XOR of operand signs
+        result.isNegative = this.isNegative ^ other.isNegative;
         return result;
     }
 
