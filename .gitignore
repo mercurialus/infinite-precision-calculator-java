@@ -1,0 +1,57 @@
+#Standard gitignore template for java
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Virtual machine crash logs
+hs_err_pid*
+
+# Maven / Gradle directories
+target/
+build/
+
+# Eclipse project files
+*.launch
+.settings/
+.project
+.classpath
+
+# IntelliJ IDEA project files
+*.iml
+.idea/
+out/
+
+# NetBeans project files
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+*.nb-gradle/
+
+# VS Code
+.vscode/
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
