@@ -10,9 +10,9 @@ import java.util.*;
 // I hope you get it :)
 public class AInteger {
     // Storing the Integer in base10000, Least significant chunks first
-    private List<Integer> value = new ArrayList<>();
+    List<Integer> value = new ArrayList<>();
     // boolean for negative numbers, true -> Negative else positive
-    private boolean isNegative = false;
+    boolean isNegative = false;
 
     // Default constructor, initialize to 0
     public AInteger() {
@@ -66,7 +66,7 @@ public class AInteger {
     }
 
     // Strip starting zeros
-    private void stripZeros() {
+    void stripZeros() {
         // Remove all leading zeros except the last one
         while (value.size() > 1 && value.get(value.size() - 1) == 0) {
             value.remove(value.size() - 1); // Remove the last element if it's 0
@@ -77,7 +77,7 @@ public class AInteger {
     }
 
     // Absolute comparison
-    private static int compareAbsolute(AInteger a, AInteger b) {
+    static int compareAbsolute(AInteger a, AInteger b) {
         // Compare the size of the numbers first
         if (a.value.size() != b.value.size())
             return Integer.compare(a.value.size(), b.value.size());
