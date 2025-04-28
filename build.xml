@@ -3,17 +3,14 @@
 
     <property name="src.dir" value="src"/>
     <property name="build.dir" value="build"/>
-    <property name="jar.dir" value="jar"/>
     <property name="main.class" value="MyInfArith"/>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
-        <delete dir="${jar.dir}"/>
     </target>
 
     <target name="prepare">
         <mkdir dir="${build.dir}"/>
-        <mkdir dir="${jar.dir}"/>
     </target>
 
     <target name="compile" depends="prepare">
@@ -21,13 +18,13 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar destfile="${jar.dir}/aarithmetic.jar">
+        <jar destfile="${src.dir}/arbitraryarithmetic/aarithmetic.jar">
             <fileset dir="${build.dir}/arbitraryarithmetic"/> 
         </jar>
     </target>
 
     <target name="run" depends="compile,jar">
-        <java classname="${main.class}" fork="true" classpath="${build.dir}:${jar.dir}/aarithmetic.jar">
+        <java classname="${main.class}" fork="true" classpath="${build.dir}:${src.dir}/arbitraryarithmetic/aarithmetic.jar">
             <arg line="${args}"/>
         </java>
     </target>
