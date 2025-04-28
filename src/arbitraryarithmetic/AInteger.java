@@ -9,7 +9,7 @@ import java.util.*;
 // 10000 are two digits -> 1000 and 0
 // I hope you get it :)
 public class AInteger {
-    // Storing the Integer in base10000, Least significant chunks first
+    // Storing the Integer in base10000, Least significant digits first
     List<Integer> value = new ArrayList<>();
     // boolean for negative numbers, true -> Negative else positive
     boolean isNegative = false;
@@ -28,12 +28,12 @@ public class AInteger {
         isNegative = number.charAt(0) == '-'; // Check if the number starts with '-' to know if it's negative
         int start = isNegative ? 1 : 0; // If negative, start reading from the second character
 
-        // Read the number backwards, in chunks of 4 digits
+        // Read the number backwards, in digits of 4 digits
         for (int i = number.length(); i > start; i -= 4) {
-            int end = i; // End of the chunk
-            int begin = Math.max(start, i - 4); // Start of the chunk (or the beginning of the number)
-            String segment = number.substring(begin, end); // Get the chunk
-            value.add(Integer.parseInt(segment)); // Convert the chunk to an integer and add it to the list
+            int end = i; // End of the digit
+            int begin = Math.max(start, i - 4); // Start of the digit (or the beginning of the number)
+            String segment = number.substring(begin, end); // Get the digit
+            value.add(Integer.parseInt(segment)); // Convert the digit to an integer and add it to the list
         }
 
         stripZeros(); // Remove unnecessary leading zeros
@@ -57,7 +57,7 @@ public class AInteger {
     // Copy constructor
     public AInteger(AInteger other) {
         this.isNegative = other.isNegative; // Copy the sign
-        this.value = new ArrayList<>(other.value); // Copy the list of chunks
+        this.value = new ArrayList<>(other.value); // Copy the list of digits
     }
 
     // parse method
@@ -82,14 +82,14 @@ public class AInteger {
         if (a.value.size() != b.value.size())
             return Integer.compare(a.value.size(), b.value.size());
 
-        // If sizes are the same, compare each chunk from the most significant to the
+        // If sizes are the same, compare each digit from the most significant to the
         // least
         for (int i = a.value.size() - 1; i >= 0; i--) {
             int cmp = Integer.compare(a.value.get(i), b.value.get(i));
             if (cmp != 0)
                 return cmp; // Return as soon as a difference is found
         }
-        return 0; // If all chunks are the same, the numbers are equal
+        return 0; // If all digits are the same, the numbers are equal
     }
 
     // Addition for two positive numbers
@@ -99,10 +99,10 @@ public class AInteger {
 
         int carry = 0; // Carry for addition
         for (int i = 0; i < Math.max(a.value.size(), b.value.size()) || carry != 0; i++) {
-            int aVal = i < a.value.size() ? a.value.get(i) : 0; // Get the chunk from 'a' or 0 if out of bounds
-            int bVal = i < b.value.size() ? b.value.get(i) : 0; // Get the chunk from 'b' or 0 if out of bounds
+            int aVal = i < a.value.size() ? a.value.get(i) : 0; // Get the digit from 'a' or 0 if out of bounds
+            int bVal = i < b.value.size() ? b.value.get(i) : 0; // Get the digit from 'b' or 0 if out of bounds
 
-            int sum = aVal + bVal + carry; // Add the chunks and the carry
+            int sum = aVal + bVal + carry; // Add the digits and the carry
             result.value.add(sum % 10000); // Add the last 4 digits of the sum to the result
             carry = sum / 10000; // Update the carry
         }
@@ -117,12 +117,12 @@ public class AInteger {
 
         int borrow = 0; // Borrow for subtraction
         for (int i = 0; i < a.value.size(); i++) {
-            int aVal = a.value.get(i); // Get the chunk from 'a'
-            int bVal = i < b.value.size() ? b.value.get(i) : 0; // Get the chunk from 'b' or 0 if out of bounds
+            int aVal = a.value.get(i); // Get the digit from 'a'
+            int bVal = i < b.value.size() ? b.value.get(i) : 0; // Get the digit from 'b' or 0 if out of bounds
 
-            int diff = aVal - bVal - borrow; // Subtract the chunks and the borrow
+            int diff = aVal - bVal - borrow; // Subtract the digits and the borrow
             if (diff < 0) {
-                diff += 10000; // If the result is negative, borrow from the next chunk
+                diff += 10000; // If the result is negative, borrow from the next digit
                 borrow = 1; // Set the borrow flag
             } else {
                 borrow = 0; // Reset the borrow flag
@@ -164,7 +164,8 @@ public class AInteger {
         // Example : 5 - 10 -> simply subtract 10 from 5 -> -5
         // 5 - -10 -> add both -> 15, for sign if first positive, second negative ->
         // positive
-        // -5 - -10 -> have to check sign in this case
+        // -5 - -10 -> have to check sign in this case -> left < right then positive
+        // else negative
         if (isNegative != other.isNegative) {
             AInteger result = addAbsolute(this, other);
             result.isNegative = this.isNegative;
@@ -187,10 +188,13 @@ public class AInteger {
         // Simple multiplication as taught in school
         AInteger result = new AInteger();
         result.value = new ArrayList<>(Collections.nCopies(this.value.size() + other.value.size(), 0));
-        result.isNegative = this.isNegative != other.isNegative;
+        // Create alist, size ofthe new listis equal tosum of theboth the size
+        result.isNegative = this.isNegative != other.isNegative; // Check the sign,
+        // if both same positive else negative
 
+        // Basic multiplication as taught in school
         for (int i = 0; i < this.value.size(); i++) {
-            long carry = 0;
+            long carry = 0; // variable to accomodate the carry while multiplication
             for (int j = 0; j < other.value.size() || carry != 0; j++) {
                 long curr = result.value.get(i + j) + carry;
                 if (j < other.value.size())
@@ -228,9 +232,9 @@ public class AInteger {
         AInteger current = new AInteger();
         current.value.clear(); // start with zero
 
-        // long division: bring down chunks from highest to lowest
+        // long division: bring down digits from highest to lowest
         for (int i = dividend.value.size() - 1; i >= 0; i--) {
-            // shift current left by one chunk, then add next chunk
+            // shift current left by one digit, then add next digit
             current.value.add(0, dividend.value.get(i));
             current.stripZeros();
 
@@ -258,14 +262,17 @@ public class AInteger {
         result.value = quotMsf;
         result.stripZeros();
 
-        // sign of quotient is XOR of operand signs
-        result.isNegative = this.isNegative ^ other.isNegative;
+        // sign of quotient is given byu -> both same then pos else neg
+        result.isNegative = (this.isNegative != other.isNegative);
         return result;
     }
 
     // override toString() method to print the number properly
     @Override
     public String toString() {
+        if (value.size() == 1 && value.get(0) == 0) { // if value=0 return 0
+            return "0";
+        }
         if (value.isEmpty())
             return "0"; // Empty number -> that means zero , just return zero
 

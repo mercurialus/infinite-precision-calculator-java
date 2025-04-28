@@ -3,49 +3,52 @@ package arbitraryarithmetic;
 import arbitraryarithmetic.AInteger;
 import java.util.*;
 
-//   Arbitrary-precision floating-point number that re-uses AInteger for the
-//   un-scaled
-//   mantissa and stores the scale (= number of decimal digits) separately.
-//  
-//   Value = unscaled × 10^{-scale}
-//  
-//   Base-10 000 representation is identical to AInteger’s implementation.
-//   All public arithmetic methods return new AFloat objects and never mutate
-//   the operands (functional style).
-//  
-//   Precision rule (project doc):
-//   – keep all mathematically exact digits during computation
-//   – when printed, truncate (NOT round) to max 30 fractional digits.
+@SuppressWarnings("unused") // Suppressing useless warnings
+//
+// I have written most of comments considering a different base
+// So if i have written somewhere 'a digit' it highly points towards me using
+// the base 10000
+// therefore by a digit i mean -> 1234 is a digit, 123 is a digit
+// 1 is a digit and 9999 is a digit too
+// 10000 are two digits -> 1000 and 0
+// I hope you get it :)
+// For ease of implementation, we can just directly use AInteger
+// class by scaling, and descaling the output :)
+// Value = unscaled * 10^{-scale}
+// Precision rule (project doc):
+// – keep all mathematically exact digits during computation
+// – when printed, truncate (NOT round) to max 30 fractional digits.
 
 public class AFloat {
 
     private AInteger unscaled; // absolute value with no decimal point
-    private int scale; // #digits right of decimal point
-    private boolean isNegative; // sign bit
+    private int scale; // number of digits right of decimal point
+    private boolean isNegative; // store the sign
 
-    /** 0.0 default */
+    // 0.0 default
     public AFloat() {
         this.unscaled = new AInteger(0);
         this.scale = 0;
         this.isNegative = false;
     }
 
-    /** from string (examples: "-123.45", "9876", ".0012", "-.5") */
+    // from string (examples: "-123.45", "9876", ".0012", "-.5")
     public AFloat(String s) {
-        if (s == null || s.isEmpty())
+        if (s == null || s.isEmpty()) // Empty string returns an exception
             throw new IllegalArgumentException("Empty string");
 
-        // sign
+        // sign check
         isNegative = s.charAt(0) == '-';
         int start = (s.charAt(0) == '+' || s.charAt(0) == '-') ? 1 : 0;
-
+        // Main implementation where string is parse after the sign
         // split integer / fractional parts
         int dot = s.indexOf('.', start);
         String intPart, fracPart;
-        if (dot == -1) {
+        if (dot == -1) { // if no decimal, then fractional part doesn't exist
             intPart = s.substring(start);
             fracPart = "";
-        } else {
+        } else { // if it does exist, then strat to dot is characterstic of the number and the
+                 // remaining part is the mantissa
             intPart = s.substring(start, dot);
             fracPart = s.substring(dot + 1);
         }
@@ -54,10 +57,11 @@ public class AFloat {
         if (fracPart.isEmpty())
             fracPart = "0";
 
-        // remove leading zeros in int part, trailing zeros in frac part
+        // remove leading zeros in int part, trailing zeros in frac part, using basic
+        // string operations
         intPart = intPart.replaceFirst("^0+(?!$)", "");
         fracPart = fracPart.replaceFirst("0+$", "");
-        scale = fracPart.length();
+        scale = fracPart.length(); // scale of the number for example 0.001 has scale 3 since 0.001 = 1* 10^-3
 
         // concatenate to one big integer string
         String combined = intPart + fracPart;
@@ -69,21 +73,21 @@ public class AFloat {
             isNegative = false; // -0 → +0
     }
 
-    // from int (convenience)
+    // Using AInteger -> makes life easy :)
     public AFloat(int n) {
         this.unscaled = new AInteger(Math.abs(n));
         this.scale = 0;
         this.isNegative = n < 0;
     }
 
-    // copy
+    // Copy operator
     public AFloat(AFloat other) {
         this.unscaled = new AInteger(other.unscaled);
         this.scale = other.scale;
         this.isNegative = other.isNegative;
     }
 
-    // parse
+    // parse function, everything is parsed in the constructor
     public static AFloat parse(String s) {
         return new AFloat(s);
     }
@@ -104,33 +108,15 @@ public class AFloat {
         return res;
     }
 
-    // returns a copy with its scale increased by `n` (multiplies unscaled by 10^n).
-    private AFloat shiftScale(int n) {
-        if (n == 0)
-            return new AFloat(this);
-        AFloat copy = new AFloat(this);
-        copy.unscaled = copy.unscaled.multiply(pow10(n));
-        copy.scale += n;
-        return copy;
-    }
-
-    // compare absolute values ; reused in add/sub
-    private static int compareAbs(AFloat a, AFloat b) {
-        // align scales first
-        int common = Math.max(a.scale, b.scale);
-        AInteger ua = a.unscaled.multiply(pow10(common - a.scale));
-        AInteger ub = b.unscaled.multiply(pow10(common - b.scale));
-        return AInteger.compareAbsolute(ua, ub);
-    }
-
+    // Addition function for AFloat
     public AFloat add(AFloat other) {
         // Align the scales
         int common = Math.max(this.scale, other.scale);
-        AInteger u1 = this.unscaled.multiply(pow10(common - this.scale));
-        AInteger u2 = other.unscaled.multiply(pow10(common - other.scale));
+        AInteger u1 = this.unscaled.multiply(pow10(common - this.scale)); // Converts it to AInteger by scaling it
+        AInteger u2 = other.unscaled.multiply(pow10(common - other.scale)); // Converts it to AInteger by scaling it
 
-        AInteger res;
-        boolean neg;
+        AInteger res; // Result
+        boolean neg; // Neg or pos?
         if (this.isNegative == other.isNegative) { // same sign → add magnitudes
             res = u1.add(u2);
             neg = this.isNegative;
@@ -148,10 +134,11 @@ public class AFloat {
         out.unscaled = res;
         out.scale = common;
         out.isNegative = neg && !(res.size() == 1 && res.toString().equals("0"));
-        out.stripZeros();
+        out.stripZeros(); // Strip leading zeros
         return out;
     }
 
+    // Subtract function, just use addition function by negating the second number
     public AFloat subtract(AFloat other) {
         // a - b == a + (-b)
         AFloat negOther = new AFloat(other);
@@ -159,11 +146,13 @@ public class AFloat {
         return this.add(negOther);
     }
 
+    // Multiply function
     public AFloat multiply(AFloat other) {
         AFloat out = new AFloat();
-        out.unscaled = this.unscaled.multiply(other.unscaled);
-        out.scale = this.scale + other.scale;
-        out.isNegative = this.isNegative ^ other.isNegative;
+        out.unscaled = this.unscaled.multiply(other.unscaled); // Simply multiply the unscaled part
+        out.scale = this.scale + other.scale; // Scale is added in multiplication x*10^a * y*10^b -> (x*y)* 10^(a+b),
+                                              // the scales are a and b, and they are added in the product
+        out.isNegative = (this.isNegative != other.isNegative); // IF same -> is not negative otherwise positive
         out.stripZeros();
         return out;
     }
@@ -181,16 +170,16 @@ public class AFloat {
         AFloat out = new AFloat();
         out.unscaled = quotient;
         out.scale = this.scale + RESULT_SCALE;
-        out.isNegative = this.isNegative ^ other.isNegative;
+        out.isNegative = (this.isNegative != other.isNegative);// IF same -> is not negative otherwise positive
         out.stripZeros();
         return out;
     }
 
-    // remove trailing zeros in unscaled & adjust scale; also normalise -0 → +0
+    // remove trailing zeros in unscaled and adjust scale; also normalise -0 → +0
     private void stripZeros() {
         // remove trailing decimal zeros (i.e., factors of 10) from unscaled
         while (scale > 0) {
-            // quick check: last chunk & possible power-of-10 in base10k
+            // quick check: last digit and possible power-of-10 in base10k
             if (unscaled.value.get(0) % 10 != 0)
                 break;
             // divide by 10 by repeated subtraction of digits
@@ -208,7 +197,7 @@ public class AFloat {
 
     // divides an AInteger by 10, returns [quotient, remainder]
     private static AInteger[] divMod10(AInteger num) {
-        // long division base-10 on base-10000 chunks
+        // long division base-10 on base-10000 digits
         List<Integer> res = new ArrayList<>(Collections.nCopies(num.value.size(), 0));
         int rem = 0;
         for (int i = num.value.size() - 1; i >= 0; i--) {
@@ -225,6 +214,9 @@ public class AFloat {
 
     @Override
     public String toString() {
+        if (unscaled.size() == 1 && unscaled.value.get(0) == 0) {
+            return "0";
+        }
         String digits = unscaled.toString();
         // pad with leading zeros if digits shorter than scale
         if (scale >= digits.length()) {
