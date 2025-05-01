@@ -37,6 +37,10 @@ public class AFloat {
         if (s == null || s.isEmpty()) // Empty string returns an exception
             throw new IllegalArgumentException("Empty string");
 
+        // check for invalid characters
+        if (!s.matches("^[+-]?\\d+(\\.\\d+)?$")) // regex to check for valid number
+            throw new IllegalArgumentException("Invalid number format: " + s);
+
         // sign check
         isNegative = s.charAt(0) == '-';
         int start = (s.charAt(0) == '+' || s.charAt(0) == '-') ? 1 : 0;
@@ -214,29 +218,44 @@ public class AFloat {
 
     @Override
     public String toString() {
-        if (unscaled.size() == 1 && unscaled.value.get(0) == 0) {
-            return "0";
+        // Convert the absolute value to a decimal string
+        String digits = unscaled.toString(); // unscaled value, no sign
+        int len = digits.length();
+
+        // Work out integer and fractional parts
+        // Scale = how many digits belong after the decimal point
+        int cut = Math.max(len - scale, 0); // index where fractional part starts
+        String intPart = (cut == 0) ? "0" : digits.substring(0, cut);
+        String fracPart = digits.substring(cut); // may be empty
+
+        // Pad with leading zeros if we don’t have enough digits for the scale
+        if (fracPart.length() < scale) {
+            fracPart = "0".repeat(scale - fracPart.length()) + fracPart;
         }
-        String digits = unscaled.toString();
-        // pad with leading zeros if digits shorter than scale
-        if (scale >= digits.length()) {
-            StringBuilder sb = new StringBuilder();
-            if (isNegative)
-                sb.append('-');
-            sb.append("0.");
-            for (int i = 0; i < scale - digits.length(); i++)
-                sb.append('0');
-            sb.append(digits);
-            return trimFraction(sb.toString());
-        } else if (scale == 0) {
-            return (isNegative ? "-" : "") + digits;
-        } else {
-            int cut = digits.length() - scale;
-            String intPart = digits.substring(0, cut);
-            String fracPart = digits.substring(cut);
-            String out = (isNegative ? "-" : "") + intPart + "." + fracPart;
-            return trimFraction(out);
+
+        //
+        // At this point fracPart has exactly `scale` digits.
+        // Now force **exactly 30** digits after the decimal:
+        // * pad with trailing zeros if scale < 30
+        // * truncate if scale > 30 (no rounding)
+        // * keep as-is if scale == 30
+        //
+        if (scale < 30) {
+            fracPart = fracPart + "0".repeat(30 - scale);
+        } else if (scale > 30) {
+            fracPart = fracPart.substring(0, 30);
         }
+
+        // Handle the special case “0.000…”
+        // (unscaled could be zero even when scale > 0)
+        boolean isZero = intPart.equals("0") && fracPart.chars().allMatch(ch -> ch == '0');
+
+        // Assemble the final string
+        StringBuilder sb = new StringBuilder(intPart.length() + 32);
+        if (isNegative && !isZero)
+            sb.append('-');
+        sb.append(intPart).append('.').append(fracPart);
+        return sb.toString();
     }
 
     // truncate / pad to ≤30 fractional digits, remove trailing zeros if needed

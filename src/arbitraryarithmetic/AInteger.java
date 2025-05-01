@@ -21,12 +21,13 @@ public class AInteger {
 
     // String -> AInteger Constructor
     public AInteger(String number) {
-        if (number == null || number.isEmpty()) {
+        if (number == null || number.isEmpty() || !number.matches("^[+-]?\\d+$")) {
             throw new IllegalArgumentException("Invalid input string"); // If the input is empty or null, throw an error
         }
 
         isNegative = number.charAt(0) == '-'; // Check if the number starts with '-' to know if it's negative
-        int start = isNegative ? 1 : 0; // If negative, start reading from the second character
+        boolean positiveSign = number.charAt(0) == '+'; // Check if the number starts with '+'
+        int start = (isNegative || positiveSign) ? 1 : 0; // If negative, start reading from the second character
 
         // Read the number backwards, in digits of 4 digits
         for (int i = number.length(); i > start; i -= 4) {
