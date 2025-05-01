@@ -36,11 +36,6 @@ public class AFloat {
     public AFloat(String s) {
         if (s == null || s.isEmpty()) // Empty string returns an exception
             throw new IllegalArgumentException("Empty string");
-
-        // check for invalid characters
-        if (!s.matches("^[+-]?\\d+(\\.\\d+)?$")) // regex to check for valid number
-            throw new IllegalArgumentException("Invalid number format: " + s);
-
         // sign check
         isNegative = s.charAt(0) == '-';
         int start = (s.charAt(0) == '+' || s.charAt(0) == '-') ? 1 : 0;

@@ -21,7 +21,7 @@ public class AInteger {
 
     // String -> AInteger Constructor
     public AInteger(String number) {
-        if (number == null || number.isEmpty() || !number.matches("^[+-]?\\d+$")) {
+        if (number == null || number.isEmpty()) {
             throw new IllegalArgumentException("Invalid input string"); // If the input is empty or null, throw an error
         }
 

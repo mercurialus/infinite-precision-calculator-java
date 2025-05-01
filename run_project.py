@@ -2,17 +2,6 @@ import os
 import subprocess
 import sys
 
-def is_valid_number(value, dtype):
-    try:
-        if dtype == 'int':
-            return str(int(value)) == value
-        elif dtype == 'float':
-            return True
-        else:
-            return False
-    except ValueError:
-        return False
-
 def main():
     build_file = os.path.join(os.path.dirname(__file__), "build.xml")
 
@@ -50,11 +39,6 @@ def main():
     # Validate operation
     if operation not in ('add', 'sub', 'mul', 'div'):
         print(f"Error: Expected 'add' or 'sub' or 'mul' or 'div', got {operation}")
-        return
-
-    # Validate operands
-    if not is_valid_number(op1, dtype) or not is_valid_number(op2, dtype):
-        print(f"Error: Expected {dtype} values, got {op1} or {op2}")
         return
 
     cmd_run = ['ant', 'run', f'-Dargs={dtype} {operation} {op1} {op2}']
