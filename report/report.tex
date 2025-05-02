@@ -30,7 +30,7 @@
 This report outlines the design and development of a Java library that supports \textbf{arbitrary-precision arithmetic} for both integers and floating-point numbers. The project addresses the first project from the CS1023 “Software Development Fundamentals” course (Jan–May~2025). The final submission includes:
 
 \begin{enumerate}[label=\arabic*.]
-  \item A compiled JAR file located at \texttt{arbitraryarithmetic/aarithmetic.jar}, containing the public classes \texttt{AInteger} and \texttt{AFloat}.
+  \item A compiled JAR file located at \texttt{src/arbitraryarithmetic/aarithmetic.jar}, containing the public classes \texttt{AInteger} and \texttt{AFloat}.
   \item A command-line utility named \texttt{MyInfArith} that can evaluate a single binary arithmetic expression.
   \item An Ant build script (\texttt{build.xml}) for automating compilation, packaging, and execution.
   \item This report, written in \LaTeX.
@@ -153,6 +153,10 @@ root@921168cdd6d4:/app# python run_project.py float div 244727.15202 75964.3891
   \item Selecting an internal numeric base impacts both computational efficiency and string formatting.
   \item Managing sign propagation correctly is essential for clean and bug-free arithmetic.
   \item Writing tests alongside development speeds up debugging and ensures correctness.
+  \item Dockerization of the project simplifies deployment and testing across different environments.
+  \item Desigining a command-line interface requires careful consideration of user input and error handling.
+  \item Using Ant for build automation streamlines the development process and reduces manual errors.
+  \item Understanding the limitations of algorithms is crucial for making informed design choices.
   \item Automating builds using Ant simplifies project maintenance and reproducibility.
 \end{itemize}
 
