@@ -41,8 +41,15 @@ def main():
         print(f"Error: Expected 'add' or 'sub' or 'mul' or 'div', got {operation}")
         return
 
-    cmd_run = ['ant', 'run', f'-Dargs={dtype} {operation} {op1} {op2}']
-    print(f"Running the program with the command: {' '.join(cmd_run)}")
+    cmd_run = (
+    f'ant -Dargs="{dtype} {operation} {op1} {op2}" run'
+)                     # one string, quotes kept
+    print("Running:", cmd_run)
+
+# no list here, give shell=True so the shell keeps the quotes intact
+    result = subprocess.run(
+    cmd_run, capture_output=True, text=True, shell=True
+    )
     build_dir = os.path.join(os.path.dirname(__file__), "build")
 
     if not os.path.isdir(build_dir):
